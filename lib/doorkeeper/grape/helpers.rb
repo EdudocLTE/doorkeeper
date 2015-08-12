@@ -26,7 +26,18 @@ module Doorkeeper
                         403
                       end
 
-        error!({ error: error.description }, status_code, error.headers)
+        error_code = case error.description
+                     when "The access token expired"
+                       ERRORS[:expired_token]
+                     when "The access token is invalid"
+                       ERRORS[:invalid_token]
+                     when "The access token was revoked"
+                       ERRORS[:revoked_token]
+                     else
+                       ERRORS[:unknown]
+                     end
+
+        error!({ error: error.description, code: error_code }, status_code, error.headers)
       end
 
       private
